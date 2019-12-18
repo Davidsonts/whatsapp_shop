@@ -3,6 +3,8 @@
 if (!defined('_PS_VERSION_'))
     exit();
 
+include_once(_PS_MODULE_DIR_ . 'whatsapp_shop/classes/WhatsappShop.php');
+
 class Whatsapp_Shop extends Module
 {
     public function __construct()
@@ -25,28 +27,24 @@ class Whatsapp_Shop extends Module
 
     public function install()
     {
-        if (Shop::isFeatureActive())
-            Shop::setContext(Shop::CONTEXT_ALL);
-        
-        $whatsapp_db = _DB_PREFIX_."whatsapp_shop";
+        include(dirname(__FILE__).'/sql/install.php');
         
         return parent::install() &&
-            $this->registerHook('displayFooter') && Configuration::updateValue($whatsapp_db, '#####');
+            $this->registerHook('displayFooter');
     }
     
     public function uninstall()
     {
-        if (!parent::uninstall() || !Configuration::deleteByName(_DB_PREFIX_.'whatsapp_shop'))
-            return false;
-        return true;
+        include(dirname(__FILE__).'/sql/uninstall.php');
+		return parent::uninstall();
     }
 
     public function hookdisplayFooter($params)
     {
-        $whatsapp_db = _DB_PREFIX_."whatsapp_shop";
+        $numero = WhatsappShop::selectNumero();
         // < assign variables to template >
         $this->context->smarty->assign(
-            array('whatsapp_shop' => Configuration::get($whatsapp_db))
+            array('whatsapp_shop' => $numero)
         );
 
         return $this->display(__FILE__, 'whatsapp_shop.tpl');
@@ -66,7 +64,7 @@ class Whatsapp_Shop extends Module
                 array(
                     'type' => 'text',
                     'label' => $this->l('Whatsapp'),
-                    'name' => _DB_PREFIX_.'whatsapp_shop',
+                    'name' => 'numero',
                     //'lang' => true,  
                     'size' => 20,
                     'required' => true
@@ -95,18 +93,21 @@ class Whatsapp_Shop extends Module
         $helper->toolbar_btn = array(
             'save' =>
                 array(
+                    // 'desc' => $this->l('Save'),
+                    // 'href' => AdminController::$currentIndex.'&configure='.$this->name.'&save'.$this->name.
+                    //     '&token='.Tools::getAdminTokenLite('AdminModules'),
                     'desc' => $this->l('Save'),
-                    'href' => AdminController::$currentIndex.'&configure='.$this->name.'&save'.$this->name.
-                        '&token='.Tools::getAdminTokenLite('AdminModules'),
+                    'href' => '' 
                 ),
             'back' => array(
                 'href' => AdminController::$currentIndex.'&token='.Tools::getAdminTokenLite('AdminModules'),
                 'desc' => $this->l('Back to list')
             )
         );
-    
+
+
         // < load current value >
-        $helper->fields_value[_DB_PREFIX_.'whatsapp_shop'] = Configuration::get(_DB_PREFIX_.'whatsapp_shop');
+        $helper->fields_value['numero'] = WhatsappShop::selectNumero();
     
         return $helper->generateForm($fields_form);
     } 
@@ -114,21 +115,19 @@ class Whatsapp_Shop extends Module
     public function getContent()
     {
         $output = null;
-    
-    
+    //print_r("TESTE");die();
         // < here we check if the form is submited for this module >
         if (Tools::isSubmit('submit'.$this->name)) {
-            $whatsapp_shop = strval(Tools::getValue(_DB_PREFIX_.'whatsapp_shop'));
+            $numero = strval(Tools::getValue('numero'));
            // die($whatsapp_shop);
             // < make some validation, check if we have something in the input >
-            if (!isset($whatsapp_shop))
+            if (!isset($numero))
                 $output .= $this->displayError($this->l('Please insert something in this field.'));
             else
             {
                 $whatsapp_db = _DB_PREFIX_.'whatsapp_shop';
                 // < this will update the value of the Configuration variable >
-                Configuration::updateValue($whatsapp_db, $whatsapp_shop);
-    
+                WhatsappShop::updateNumero($numero);
     
                 // < this will display the confirmation message >
                 $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
