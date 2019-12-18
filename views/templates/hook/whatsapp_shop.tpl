@@ -1,9 +1,10 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-<a href="https://wa.me/{$whatsapp_shop}?text=I'm%20interested%20in%20your%20car%20for%20sale" class="wfloat" id="whatsapp_shop1" target="_blank">
+{* <a href="https://wa.me/{$whatsapp_shop}?text=I'm%20interested%20in%20your%20car%20for%20sale" class="wfloat" id="whatsapp_shop1" target="_blank"> *}
+<a href="https://api.whatsapp.com/send?phone={$whatsapp_shop}" class="wfloat" id="whatsapp_shop1" target="_blank">
 	<i class="fa fa-whatsapp w-float"></i>
 </a>
 
-<a href="https://web.whatsapp.com/send?phone=+55{$whatsapp_shop}" class="wfloat" id="whatsapp_shop2" target="_blank">
+<a href="https://web.whatsapp.com/send?phone=+{$whatsapp_shop}" class="wfloat" id="whatsapp_shop2" target="_blank">
 	<i class="fa fa-whatsapp w-float"></i>
 </a>
 
