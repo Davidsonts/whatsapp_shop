@@ -4,6 +4,7 @@ if (!defined('_PS_VERSION_'))
     exit();
 
 include_once(_PS_MODULE_DIR_ . 'whatsapp_shop/classes/WhatsappShop.php');
+include_once(_PS_MODULE_DIR_ . 'whatsapp_shop/classes/WhatsappShopConfig.php');
 
 class Whatsapp_Shop extends Module
 {
@@ -41,99 +42,138 @@ class Whatsapp_Shop extends Module
 
     public function hookdisplayFooter($params)
     {
-        $numero = WhatsappShop::selectNumero();
+        $lang_iso_code = Context::getContext()->language->iso_code;
+        $whatsapps = WhatsappShop::buscarNumeroLang($lang_iso_code);
+        $config = WhatsappShopConfig::selectConfig();//die($config );
+        $config_lado = WhatsappShopConfig::selectConfigLado();
+
+        ## $whatsapps = WhatsappShop::selectNumero();
         // < assign variables to template >
-        $this->context->smarty->assign(
-            array('whatsapp_shop' => $numero)
-        );
+        $this->context->smarty->assign('whatsapps', $whatsapps);
+        $this->context->smarty->assign('config', $config);
+        $this->context->smarty->assign('config_lado', $config_lado);
+        
 
         return $this->display(__FILE__, 'whatsapp_shop.tpl');
     }
 
-    
-
-    public function displayForm()
-    {
-        //die(_DB_PREFIX_);
-        // < init fields for form array >
-        $fields_form[0]['form'] = array(
-            'legend' => array(
-                'title' => $this->l('Whatsapp Shop Module'),
-            ),
-            'input' => array(
-                array(
-                    'type' => 'text',
-                    'label' => $this->l('Whatsapp'),
-                    'name' => 'numero',
-                    //'lang' => true,  
-                    'size' => 20,
-                    'required' => true
-                ),
-            ),
-            'submit' => array(
-                'title' => $this->l('Save'),
-                'class' => 'btn btn-default pull-right'
-            )
-        );
-    
-        // < load helperForm >
-        $helper = new HelperForm();
-    
-        // < module, token and currentIndex >
-        $helper->module = $this;
-        $helper->name_controller = $this->name;
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
-    
-        // < title and toolbar >
-        $helper->title = $this->displayName;
-        $helper->show_toolbar = true;        // false -> remove toolbar
-        $helper->toolbar_scroll = true;      // yes - > Toolbar is always visible on the top of the screen.
-        $helper->submit_action = 'submit'.$this->name;
-        $helper->toolbar_btn = array(
-            'save' =>
-                array(
-                    // 'desc' => $this->l('Save'),
-                    // 'href' => AdminController::$currentIndex.'&configure='.$this->name.'&save'.$this->name.
-                    //     '&token='.Tools::getAdminTokenLite('AdminModules'),
-                    'desc' => $this->l('Save'),
-                    'href' => '' 
-                ),
-            'back' => array(
-                'href' => AdminController::$currentIndex.'&token='.Tools::getAdminTokenLite('AdminModules'),
-                'desc' => $this->l('Back to list')
-            )
-        );
-
-
-        // < load current value >
-        $helper->fields_value['numero'] = WhatsappShop::selectNumero();
-    
-        return $helper->generateForm($fields_form);
-    } 
-    
     public function getContent()
     {
         $output = null;
-    //print_r("TESTE");die();
+        // print_r("TESTE");die();
         // < here we check if the form is submited for this module >
-        if (Tools::isSubmit('submit'.$this->name)) {
+        if (Tools::isSubmit('wp-add')) {
+            $nome = strval(Tools::getValue('nome'));
             $numero = strval(Tools::getValue('numero'));
+            $tipo = strval(Tools::getValue('tipo'));
+            $iso_code  = strval(Tools::getValue('iso_code'));
+            $ordem  = strval(Tools::getValue('ordem'));
            // die($whatsapp_shop);
             // < make some validation, check if we have something in the input >
             if (!isset($numero))
                 $output .= $this->displayError($this->l('Please insert something in this field.'));
             else
             {
+                //die("TESTE");
                 $whatsapp_db = _DB_PREFIX_.'whatsapp_shop';
                 // < this will update the value of the Configuration variable >
-                WhatsappShop::updateNumero($numero);
-    
+                WhatsappShop::addNumero($nome, $numero, $tipo, $iso_code, $ordem);
+                // WhatsappShop::updateNumero($numero, $ordem);
                 // < this will display the confirmation message >
                 $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
             }
         }
-        return $output.$this->displayForm();
+
+        if (Tools::isSubmit('wp-update')) {
+            $id = strval(Tools::getValue('id'));
+            $nome = strval(Tools::getValue('nome'));
+            $numero = strval(Tools::getValue('numero'));
+            $tipo = strval(Tools::getValue('tipo'));
+            $iso_code  = strval(Tools::getValue('iso_code'));
+            $ordem  = strval(Tools::getValue('ordem'));
+           // die($whatsapp_shop);
+            // < make some validation, check if we have something in the input >
+            if (!isset($numero))
+                $output .= $this->displayError($this->l('Please insert something in this field.'));
+            else
+            {
+                // die("TESTE wp-update");
+                $whatsapp_db = _DB_PREFIX_.'whatsapp_shop';
+                // < this will update the value of the Configuration variable >
+                WhatsappShop::updateNumero($id, $nome, $numero, $tipo, $iso_code, $ordem);
+                // WhatsappShop::updateNumero($numero, $ordem);
+                // < this will display the confirmation message >
+                $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
+            }
+        }
+      
+        if (Tools::isSubmit('wp-delete')) {
+            $id = strval(Tools::getValue('id'));
+           // die($whatsapp_shop);
+            // < make some validation, check if we have something in the input >
+            if (!isset($id))
+                $output .= $this->displayError($this->l('Please insert something in this field.'));
+            else
+            {
+                // die("TESTE wp-update");
+                // < this will update the value of the Configuration variable >
+                WhatsappShop::deletarNumero($id);
+                // WhatsappShop::updateNumero($numero, $ordem);
+                // < this will display the confirmation message >
+                $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
+            }
+        }
+
+        if (Tools::isSubmit('wp-config')) {
+            $conf = strval(Tools::getValue('conf'));
+           // die($whatsapp_shop);
+            // < make some validation, check if we have something in the input >
+            if (!isset($conf))
+                $output .= $this->displayError($this->l('Please insert something in this field.'));
+            else
+            {
+                // die("TESTE wp-update");
+                // < this will update the value of the Configuration variable >
+                WhatsappShopConfig::updateConfig($conf);
+                // < this will display the confirmation message >
+                $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
+            }
+        }
+
+        if (Tools::isSubmit('wp-config-lado')) {
+            $conf = strval(Tools::getValue('conf'));
+           // die($whatsapp_shop);
+            // < make some validation, check if we have something in the input >
+            if (!isset($conf))
+                $output .= $this->displayError($this->l('Please insert something in this field.'));
+            else
+            {
+                // die("TESTE wp-update");
+                // < this will update the value of the Configuration variable >
+                WhatsappShopConfig::updateConfigLado($conf);
+                // < this will display the confirmation message >
+                $output .= $this->displayConfirmation($this->l('Whatsapp updated!'));
+            }
+        }
+        
+
+        ///return $helper->generateForm($fields_form);
+        $countries = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('SELECT * FROM `'._DB_PREFIX_.'country` WHERE `active` = 1 ORDER BY `iso_code` ASC');
+        
+        $whatsapps = WhatsappShop::selectNumero();
+        $config = WhatsappShopConfig::selectConfig();
+        $config_lado = WhatsappShopConfig::selectConfigLado();
+
+        $this->context->smarty->assign('countries', $countries);
+        
+        $this->context->smarty->assign('whatsapps', $whatsapps);
+        
+        $this->context->smarty->assign('config', $config);
+        
+        $this->context->smarty->assign('config_lado', $config_lado);
+
+        return $this->context->smarty->fetch($this->local_path.'views/templates/admin/configure.tpl');
+
     }
         
 }    

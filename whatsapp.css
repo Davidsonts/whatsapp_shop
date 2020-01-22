@@ -1,0 +1,7 @@
+.asagiSabit {position:fixed;bottom:5px;right:5px;z-index:999;cursor:pointer}
+ 
+.whatsappBlock a {display:inline-block;height:30px;background:#65BC54;outline: 3px solid #fff;padding:5px 10px;color:#fff !important;font-weight:bold; margin-right: 22px;margin-bottom: 5px;}
+.whatsappBlock a img {height:100%;width:auto}
+
+.whatsappBlock {display:inline-block;height:30px;background:#65BC54;outline: 3px solid #fff;padding:5px 10px;color:#fff !important;font-weight:bold; margin-right: 22px;margin-bottom: 5px;}
+.whatsappBlock img {height:100%;width:auto}

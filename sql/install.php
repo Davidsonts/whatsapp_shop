@@ -28,16 +28,28 @@ $sql = array();
 
 $sql = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'whatsapp_shop` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
+    `nome` varchar(255),
 	`numero` varchar(255),
+    `tipo` int(11),
+    `iso_code` varchar(2),
+    `ordem` int(11),
     PRIMARY KEY  (`id`)
 ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
 
-$numero = "######";
+$conf = 1;
 
-$sql2 = 'INSERT INTO `'._DB_PREFIX_.'whatsapp_shop` (`numero`) 
-            VALUES ("'.$numero.'");';
+$sql2 = 'CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'whatsapp_shop_config` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+	`conf` varchar(255),
+    PRIMARY KEY  (`id`)
+) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8;';
+
+$sql3 = 'INSERT INTO `'._DB_PREFIX_.'whatsapp_shop_config` (`conf`) VALUES ("'.$conf.'");';
 
 Db::getInstance()->execute($sql);
 
 Db::getInstance()->execute($sql2);
 
+Db::getInstance()->execute($sql3);
+
+Db::getInstance()->execute($sql3);
